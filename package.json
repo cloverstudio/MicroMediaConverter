@@ -1,0 +1,38 @@
+{
+  "name": "micro-media-converter",
+  "version": "1.0.0",
+  "description": "Standalone rabbitmq consumer, that creates thumbnail and compressed version of a file using ffmpeg",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc && node build/index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cloverstudio/MicroMediaConverter.git"
+  },
+  "keywords": [
+    "converter",
+    "media",
+    "consumer",
+    "queue",
+    "ffmpeg",
+    "rabbitmq",
+    "fast"
+  ],
+  "author": "Clover Studio Ltd.",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cloverstudio/MicroMediaConverter/issues"
+  },
+  "homepage": "https://github.com/cloverstudio/MicroMediaConverter#readme",
+  "dependencies": {
+    "amqplib": "^0.8.0"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.5.17",
+    "@types/node": "^15.6.0",
+    "typescript": "^4.2.4"
+  }
+}
