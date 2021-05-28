@@ -2,83 +2,96 @@ import { execFile } from 'child_process';
 
 export class MutateFile {
 
-  static compressVideo(inputUrl: string, outputPath: string): Promise<string> {
+  private outputPath: string;
+
+  constructor(outpathPath: string) {
+    this.outputPath = outpathPath;
+  }
+
+  public resizeVideo(inputUrl: string, width: number, height: number): Promise<string> {
     return new Promise((resolve, reject) => {
-      if (!inputUrl || !outputPath) reject();
-      
-      const split: string[] = inputUrl.split("/");
-      const originalFile: string = split[split.length - 1];
-      const newFile: string = `${originalFile.split(".")[0]}.mp4`;
+      const newFileName: string = `resized-${this.extractFileNameFromUrl(inputUrl)}`;
+      const args: string[] = [
+        '-i', inputUrl,
+        '-s', `${width}x${height}`,
+        `${this.outputPath}/${newFileName}`
+      ];
 
-      try {
-
-        execFile('ffmpeg', [
-          '-i', inputUrl,
-          '-s', '640x480',
-          '-b:v', '512k',
-          '-c:v', 'mpeg1video',
-          '-c:a', 'copy', 
-          `${outputPath}/${newFile}`
-        ], (err: any) => {
-          if (err) reject(err);
-          resolve(newFile);
-        });;
-
-      } catch (err) {
-        reject(err);
-      }
+      execFile('ffmpeg', args, (err) => {
+        if (err) reject(err);
+        resolve(newFileName);
+      })
     });
   }
 
-  static thumbnailVideo(inputUrl: string, outputPath: string): Promise<string> {
+  public compressVideo(inputUrl: string, width: number, height: number): Promise<string> {
     return new Promise((resolve, reject) => {
-      if (!inputUrl || !outputPath) reject();
+      const newFileName: string = `compressed-${this.extractFileNameFromUrl(inputUrl)}`;
+      const args: string[] = [
+        '-i', inputUrl, '-s',
+        `${width}x${height}`,
+        '-b:v', '512k',
+        '-c:v', 'mpeg1video',
+        '-c:a', 'copy',
+        `${this.outputPath}/${newFileName}`
+      ];
 
-      const split: string[] = inputUrl.split("/");
-      const originalFile: string = split[split.length - 1];
-      const newFile: string = `${originalFile.split(".")[0]}.png`;
+      execFile('ffmpeg', args, (err) => {
+        if (err) reject(err);
+        resolve(newFileName);
+      });;
+    })
+  }
 
-      try {
+  public thumbnailVideo(
+    inputUrl: string, width: number, height: number, outputFormat?: string, compression?: number, time?: string
+    ): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const newFileName: string = this.generateThumbnailName(this.extractFileNameFromUrl(inputUrl), outputFormat);
+      const args: string[] = [
+        '-i', inputUrl, '-frames:v', '1',
+        '-s', `${width}x${height}`,
+        '-ss', `${time ? time : '00:00:01'}`,
+      ];
 
-        execFile('ffmpeg', [
-          '-i', inputUrl,
-          '-ss', '00:00:01',
-          '-frames:v', '1',
-          `${outputPath}/${newFile}`
-        ], (err: any) => {
-          if (err) reject(err);
-          resolve(newFile);
-        })
+      if (compression) args.push('-compression_level', `${compression * 100}`);
 
-      } catch (err) {
-        reject(err);
-      }
+      args.push(`${this.outputPath}/${newFileName}`)
+      execFile('ffmpeg', args, (err) => {
+        if (err) reject(err);
+        resolve(newFileName);
+      });
     });
   }
 
-  static thumbnailImage(inputUrl: string, outputPath: string): Promise<string> {
+  public thumbnailPicture(
+    inputUrl: string, width: number, height: number, outputFormat?: string, compression?: number
+    ): Promise<string> {
     return new Promise((resolve, reject) => {
-      if (!inputUrl || !outputPath) reject();
-      
-      const split: string[] = inputUrl.split("/");
-      const originalFile: string = split[split.length - 1];
-      const newFile: string = `${originalFile.split(".")[0]}.png`;
+      const newFileName: string = this.generateThumbnailName(this.extractFileNameFromUrl(inputUrl), outputFormat);
+      const args: string[] = [
+        '-i', inputUrl, '-vf', 
+        `scale=${width}:${height}`,
+      ];
 
-      try {
+      if (compression) args.push('-compression_level', `${compression * 100}`);
 
-        execFile('ffmpeg', [
-          '-i', inputUrl,
-          '-vf', 'scale=320:-1',
-          `${outputPath}/${newFile}`
-        ], (err: any) => {
-          if (err) reject(err);
-          resolve(newFile);
-        });
-
-      } catch (err) {
-        reject(err);
-      }
+      args.push(`${this.outputPath}/${newFileName}`);
+      execFile('ffmpeg', args, (err) => {
+        if (err) reject(err);
+        resolve(newFileName)
+      });
     });
+  }
+
+  private generateThumbnailName(oldName: string, outputFormat?: string): string {
+    const newName: string = outputFormat ? `${oldName.split(".")[0]}.${outputFormat}` : oldName;
+    return `thumbnail-${newName}`;
+  }
+
+  private extractFileNameFromUrl(url: string): string {
+    const split: string[] = url.split("/");
+    return split[split.length - 1];
   }
   
 }

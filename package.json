@@ -1,7 +1,7 @@
 {
-  "name": "micro-media-converter",
+  "name": "micromediaconverter",
   "version": "1.0.0",
-  "description": "Standalone rabbitmq consumer, that creates thumbnail and compressed version of a file using ffmpeg",
+  "description": "Standalone rabbitmq consumer, that uses ffmpeg to mutate files",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
@@ -22,7 +22,7 @@
     "fast"
   ],
   "author": "Clover Studio Ltd.",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/cloverstudio/MicroMediaConverter/issues"
   },
